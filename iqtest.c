@@ -63,7 +63,8 @@ static int enumerateJumps(jump *jumps) {
     return jidx;
 }
 
-void step(int *outcomes, int noutcomes, jump *jumps, int njumps, state *s) {
+static void step(int *outcomes, int noutcomes, jump *jumps, int njumps,
+                 state *s) {
     const int pop = __builtin_popcount(s->board);
     if (pop == 1) {
         outcomes[1]++;
