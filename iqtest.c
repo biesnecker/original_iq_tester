@@ -63,12 +63,11 @@ static int enumerateJumps(jump *jumps) {
     return jidx;
 }
 
-static void step(int *outcomes, int noutcomes, jump *jumps, int njumps,
-                 state *s) {
+static void step(int *outcomes, int noutcomes, const jump *jumps, int njumps,
+                 const state *s) {
     const int pop = __builtin_popcount(s->board);
     if (pop == 1) {
         outcomes[1]++;
-        free(s);
         return;
     }
     bool didJump = false;
@@ -85,14 +84,13 @@ static void step(int *outcomes, int noutcomes, jump *jumps, int njumps,
                 (((s->board & ~jumps[jidx].start) & ~jumps[jidx].middle) |
                  jumps[jidx].end);
             step(outcomes, noutcomes, jumps, njumps, newstate);
+            free(newstate);
         }
     }
     // Didn't jump, so this is an end state.
     if (!didJump) {
         outcomes[pop]++;
     }
-
-    free(s);
 }
 
 int main(int argc, char **argv) {
@@ -107,6 +105,7 @@ int main(int argc, char **argv) {
             s->board = FULL_BOARD & ~holeMask(row, hole);
 
             step(outcomes, 15, jumps, njumps, s);
+            free(s);
         }
     }
 
