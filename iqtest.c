@@ -76,15 +76,13 @@ static void step(int *outcomes, int noutcomes, const jump *jumps, int njumps,
             (~(s->board) & jumps[jidx].end)) {
             // This is a valid jump.
             didJump = true;
-            state *newstate = calloc(1, sizeof(state));
-            memcpy(newstate, s, sizeof(state));
+            state newstate = *s;
 
-            newstate->moves[newstate->moveIdx++] = (uint8_t)jidx;
-            newstate->board =
+            newstate.moves[newstate.moveIdx++] = (uint8_t)jidx;
+            newstate.board =
                 (((s->board & ~jumps[jidx].start) & ~jumps[jidx].middle) |
                  jumps[jidx].end);
-            step(outcomes, noutcomes, jumps, njumps, newstate);
-            free(newstate);
+            step(outcomes, noutcomes, jumps, njumps, &newstate);
         }
     }
     // Didn't jump, so this is an end state.
@@ -99,13 +97,12 @@ int main(int argc, char **argv) {
     const int njumps = enumerateJumps(jumps);
     for (int row = 0; row < N_ROWS; ++row) {
         for (int hole = 0; hole < ROW_LENGTHS[row]; ++hole) {
-            state *s = calloc(1, sizeof(state));
-            s->emptyRow = row;
-            s->emptyHole = hole;
-            s->board = FULL_BOARD & ~holeMask(row, hole);
+            state s = {0};
+            s.emptyRow = row;
+            s.emptyHole = hole;
+            s.board = FULL_BOARD & ~holeMask(row, hole);
 
-            step(outcomes, 15, jumps, njumps, s);
-            free(s);
+            step(outcomes, 15, jumps, njumps, &s);
         }
     }
 
